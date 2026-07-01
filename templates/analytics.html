@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <h2>Your Learning Analytics</h2>
+  <p class="muted mb-3">Visual insights into your progress, performance, and habits.</p>
+
+  <div class="grid grid-2 mb-3">
+    <div class="card chart-card">
+      <h4>Category Progress</h4>
+      <canvas id="categoryChart" height="220"></canvas>
+    </div>
+    <div class="card chart-card">
+      <h4>Weekly Activity</h4>
+      <canvas id="weeklyChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card chart-card">
+      <h4>Quiz Performance Trend</h4>
+      <canvas id="quizChart" height="220"></canvas>
+    </div>
+    <div class="card chart-card">
+      <h4>Difficulty Breakdown</h4>
+      <canvas id="difficultyChart" height="220"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

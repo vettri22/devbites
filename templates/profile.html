@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <div class="card flex-between mb-3">
+    <div class="flex gap-2" style="align-items:center;">
+      <div class="nav-avatar" style="width:56px;height:56px;font-size:1.4rem;">{{ current_user.username[0]|upper }}</div>
+      <div>
+        <h2 style="margin:0;">{{ current_user.username }}</h2>
+        <p class="muted" style="margin:0;">{{ current_user.email }} · Level {{ current_user.level() }} · {{ current_user.plan|capitalize }} Plan</p>
+      </div>
+    </div>
+    <a href="{{ url_for('payment.history') }}" class="btn btn-outline">Billing History</a>
+  </div>
+
+  <div class="grid grid-4">
+    <div class="card stat-card"><div class="stat-num">{{ current_user.xp }}</div><div class="stat-label">Total XP</div></div>
+    <div class="card stat-card"><div class="stat-num">{{ completed_count }}</div><div class="stat-label">Bites Completed</div></div>
+    <div class="card stat-card"><div class="stat-num">{{ attempts_count }}</div><div class="stat-label">Quizzes Taken</div></div>
+    <div class="card stat-card"><div class="stat-num">{{ avg_score }}%</div><div class="stat-label">Avg Quiz Score</div></div>
+  </div>
+
+  <h3 class="mt-4 mb-2">Certificates</h3>
+  <div class="grid grid-3">
+    {% for cert in certificates %}
+    <div class="card cert-card">
+      <div class="cert-icon">📜</div>
+      <h4>{{ cert.category.name if cert.category else 'General' }}</h4>
+      <a href="{{ url_for('certificate.download', cert_id=cert.id) }}" class="btn btn-outline btn-block">Download</a>
+    </div>
+    {% else %}
+    <p class="muted">No certificates yet. <a href="{{ url_for('certificate.list_certificates') }}">View eligible categories</a>.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

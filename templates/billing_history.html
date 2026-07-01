@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Billing History{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <h2>Billing History</h2>
+  <div class="card">
+    {% if payments %}
+    <table>
+      <thead><tr><th>Plan</th><th>Amount</th><th>Transaction ID</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td>{{ p.plan|capitalize }}</td>
+          <td>${{ p.amount }}</td>
+          <td>{{ p.transaction_id }}</td>
+          <td><span class="badge badge-completed">{{ p.status }}</span></td>
+          <td>{{ p.created_at.strftime('%b %d, %Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No billing history yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

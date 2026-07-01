@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <div class="flex-between mb-3">
+    <div>
+      <h2>Welcome back, {{ current_user.username }} 👋</h2>
+      <p class="muted">Level {{ current_user.level() }} · {{ current_user.streak_count }} day streak 🔥</p>
+    </div>
+    <a href="{{ url_for('main.bites_list') }}" class="btn btn-primary">Continue Learning</a>
+  </div>
+
+  <div class="grid grid-4 mb-3">
+    <div class="card stat-card"><div class="stat-num">{{ current_user.xp }}</div><div class="stat-label">Total XP</div></div>
+    <div class="card stat-card"><div class="stat-num">{{ completed_count }}/{{ total_bites }}</div><div class="stat-label">Bites Completed</div></div>
+    <div class="card stat-card"><div class="stat-num">{{ current_user.streak_count }}</div><div class="stat-label">Day Streak</div></div>
+    <div class="card stat-card"><div class="stat-num">{{ current_user.plan|capitalize }}</div><div class="stat-label">Current Plan</div></div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="flex-between mb-1">
+      <strong>Overall Progress</strong><span class="muted">{{ progress_pct }}%</span>
+    </div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" style="width:{{ progress_pct }}%"></div></div>
+  </div>
+
+  <h3 class="mb-2">🤖 Recommended for You</h3>
+  <div class="grid grid-4 mb-3">
+    {% for bite in recommendations %}
+    <a href="{{ url_for('main.bite_detail', slug=bite.slug) }}" class="card bite-card">
+      <span class="badge badge-{{ bite.difficulty }}">{{ bite.difficulty }}</span>
+      <h4>{{ bite.title }}</h4>
+      <p class="muted" style="font-size:0.85rem">{{ bite.summary }}</p>
+    </a>
+    {% else %}
+    <p class="muted">Complete a few bites to get personalized recommendations!</p>
+    {% endfor %}
+  </div>
+
+  <h3 class="mb-2">Recent Quiz Attempts</h3>
+  <div class="card">
+    {% if recent_attempts %}
+    <table>
+      <thead><tr><th>Bite</th><th>Score</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for a in recent_attempts %}
+        <tr>
+          <td>{{ a.bite_id and (a.score is not none) and '' }}Bite #{{ a.bite_id }}</td>
+          <td>{{ a.score }}/{{ a.total_questions }}</td>
+          <td>{{ a.attempted_at.strftime('%b %d, %Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No quiz attempts yet. Try one on any bite!</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

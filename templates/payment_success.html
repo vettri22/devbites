@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Payment Successful{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="card form-card text-center">
+    <div style="font-size:3rem;">🎉</div>
+    <h2>Payment Successful!</h2>
+    <p class="muted">You're now subscribed to the <strong>{{ payment.plan|capitalize }}</strong> plan.</p>
+    <table class="mt-2" style="text-align:left;">
+      <tr><td>Transaction ID</td><td>{{ payment.transaction_id }}</td></tr>
+      <tr><td>Amount</td><td>${{ payment.amount }}</td></tr>
+      <tr><td>Card</td><td>**** **** **** {{ payment.card_last4 }}</td></tr>
+      <tr><td>Date</td><td>{{ payment.created_at.strftime('%b %d, %Y %H:%M') }}</td></tr>
+    </table>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-block btn-lg mt-3">Go to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

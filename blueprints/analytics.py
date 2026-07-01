@@ -1,0 +1,83 @@
+from datetime import datetime, timedelta
+from flask import Blueprint, render_template, jsonify
+from flask_login import login_required, current_user
+from sqlalchemy import func
+from extensions import db, csrf
+from models import Progress, QuizAttempt, Bite, Category
+
+analytics_bp = Blueprint("analytics", __name__)
+
+
+@analytics_bp.route("/analytics")
+@login_required
+def analytics_page():
+    return render_template("analytics.html")
+
+
+@analytics_bp.route("/api/analytics/category-progress")
+@login_required
+def category_progress():
+    categories = Category.query.all()
+    labels, completed_counts, total_counts = [], [], []
+
+    for cat in categories:
+        total = Bite.query.filter_by(category_id=cat.id).count()
+        completed = (
+            Progress.query.join(Bite, Progress.bite_id == Bite.id)
+            .filter(Progress.user_id == current_user.id, Progress.completed == True, Bite.category_id == cat.id)
+            .count()
+        )
+        if total > 0:
+            labels.append(cat.name)
+            completed_counts.append(completed)
+            total_counts.append(total)
+
+    return jsonify({"labels": labels, "completed": completed_counts, "total": total_counts})
+
+
+@analytics_bp.route("/api/analytics/weekly-activity")
+@login_required
+def weekly_activity():
+    today = datetime.utcnow().date()
+    days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    labels = [d.strftime("%a") for d in days]
+    counts = []
+
+    for d in days:
+        start = datetime.combine(d, datetime.min.time())
+        end = start + timedelta(days=1)
+        count = Progress.query.filter(
+            Progress.user_id == current_user.id,
+            Progress.completed == True,
+            Progress.completed_at >= start,
+            Progress.completed_at < end,
+        ).count()
+        counts.append(count)
+
+    return jsonify({"labels": labels, "counts": counts})
+
+
+@analytics_bp.route("/api/analytics/quiz-performance")
+@login_required
+def quiz_performance():
+    attempts = (
+        QuizAttempt.query.filter_by(user_id=current_user.id)
+        .order_by(QuizAttempt.attempted_at.asc())
+        .limit(15)
+        .all()
+    )
+    labels = [a.attempted_at.strftime("%b %d") for a in attempts]
+    scores = [round((a.score / a.total_questions) * 100) if a.total_questions else 0 for a in attempts]
+    return jsonify({"labels": labels, "scores": scores})
+
+
+@analytics_bp.route("/api/analytics/difficulty-breakdown")
+@login_required
+def difficulty_breakdown():
+    completed_ids = current_user.completed_bite_ids()
+    counts = {"beginner": 0, "intermediate": 0, "advanced": 0}
+    if completed_ids:
+        bites = Bite.query.filter(Bite.id.in_(completed_ids)).all()
+        for b in bites:
+            counts[b.difficulty] = counts.get(b.difficulty, 0) + 1
+    return jsonify({"labels": list(counts.keys()), "counts": list(counts.values())})

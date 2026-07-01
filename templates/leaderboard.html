@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <div class="section-head">
+    <h2>🏆 Leaderboard</h2>
+    <p class="muted">Top learners ranked by total XP earned.</p>
+  </div>
+  <div class="card">
+    {% for user in top_users %}
+    <div class="leaderboard-row" style="{% if not loop.last %}border-bottom:1px solid var(--border);{% endif %}">
+      <div class="lb-rank">{% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}</div>
+      <div class="nav-avatar">{{ user.username[0]|upper }}</div>
+      <div style="flex:1;">
+        <strong>{{ user.username }}</strong>
+        <p class="muted" style="margin:0;font-size:0.8rem;">Level {{ user.level() }} · {{ user.streak_count }} day streak</p>
+      </div>
+      <div class="badge badge-completed">{{ user.xp }} XP</div>
+    </div>
+    {% else %}
+    <p class="muted">No learners yet. Be the first!</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

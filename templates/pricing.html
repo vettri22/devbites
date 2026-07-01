@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Pricing{% endblock %}
+{% block content %}
+<div class="container mt-3">
+  <div class="section-head">
+    <h2>Simple, Transparent Pricing</h2>
+    <p class="muted">Choose the plan that fits your learning pace. Cancel anytime.</p>
+  </div>
+
+  <div class="grid grid-3">
+    {% for key, plan in plans.items() %}
+    <div class="card pricing-card {% if key == 'pro' %}featured{% endif %}">
+      {% if key == 'pro' %}<span class="badge badge-premium" style="position:absolute;top:16px;right:16px;">Popular</span>{% endif %}
+      <h3>{{ plan.name }}</h3>
+      <div class="pricing-price">${{ plan.price }}<span>/mo</span></div>
+      <ul class="pricing-feature-list">
+        {% if key == 'free' %}
+        <li>✅ {{ plan.bites_limit }} bites access</li>
+        <li>✅ Basic quizzes</li>
+        <li>❌ Certificates</li>
+        <li>❌ Premium content</li>
+        {% elif key == 'pro' %}
+        <li>✅ Unlimited bites</li>
+        <li>✅ All quizzes + premium content</li>
+        <li>✅ Certificates of completion</li>
+        <li>✅ Personalized recommendations</li>
+        {% else %}
+        <li>✅ Everything in Pro</li>
+        <li>✅ Team leaderboard</li>
+        <li>✅ Priority support</li>
+        <li>✅ Bulk certificates</li>
+        {% endif %}
+      </ul>
+      {% if current_plan == key %}
+        <button class="btn btn-outline btn-block" disabled>Current Plan</button>
+      {% else %}
+        <a href="{{ url_for('payment.checkout', plan_key=key) }}" class="btn {% if key == 'pro' %}btn-primary{% else %}btn-outline{% endif %} btn-block">
+          {% if key == 'free' %}Switch to Free{% else %}Upgrade Now{% endif %}
+        </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
