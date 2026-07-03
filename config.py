@@ -14,16 +14,11 @@ except ImportError:  # python-dotenv is optional at runtime if env vars are set 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "devbites-super-secret-key-2024")
 
-    DB_USER = os.environ.get("DB_USER", "root")
-    DB_PASSWORD = os.environ.get("DB_PASSWORD", "password")
-    DB_HOST = os.environ.get("DB_HOST", "localhost")
-    DB_PORT = os.environ.get("DB_PORT", "3306")
-    DB_NAME = os.environ.get("DB_NAME", "devbites_db")
-
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",
-        f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}",
+        f"sqlite:///{os.path.join(basedir, 'devbites.db')}",
     )
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_recycle": 280, "pool_pre_ping": True}
 
@@ -46,7 +41,6 @@ class Config:
     XP_PER_QUIZ_CORRECT = 5
     STREAK_BONUS_XP = 15
 
-    # Fake payment plans
     PLANS = {
         "free": {"name": "Free", "price": 0, "bites_limit": 10},
         "pro": {"name": "Pro", "price": 9, "bites_limit": None},
