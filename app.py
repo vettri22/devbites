@@ -45,6 +45,9 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     csrf.init_app(app)
 
+    with app.app_context():
+        db.create_all()
+
     os.makedirs(app.config["CERTIFICATES_FOLDER"], exist_ok=True)
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
@@ -109,4 +112,8 @@ def create_app(config_name=None):
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=app.config.get("DEBUG", False), host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(
+        debug=app.config.get("DEBUG", False),
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+    )
