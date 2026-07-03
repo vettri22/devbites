@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Certificates{% endblock %}
+
 {% block content %}
 <div class="container mt-3">
   <h2>My Certificates</h2>
@@ -12,9 +13,14 @@
       <div class="cert-icon">🏆</div>
       <h4>{{ cat.name }}</h4>
       <p class="muted">{{ count }} bites completed</p>
+
       <form method="POST" action="{{ url_for('certificate.generate', category_id=cat.id) }}">
-        <button type="submit" class="btn btn-primary btn-block">Generate Certificate</button>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-primary btn-block">
+          Generate Certificate
+        </button>
       </form>
+
     </div>
     {% endfor %}
   </div>
@@ -27,8 +33,13 @@
       <div class="cert-icon">📜</div>
       <h4>{{ cert.category.name if cert.category else 'General' }}</h4>
       <p class="muted" style="font-size:0.8rem">{{ cert.cert_code }}</p>
-      <p class="muted" style="font-size:0.8rem">Issued {{ cert.issued_at.strftime('%b %d, %Y') }}</p>
-      <a href="{{ url_for('certificate.download', cert_id=cert.id) }}" class="btn btn-outline btn-block">Download PDF</a>
+      <p class="muted" style="font-size:0.8rem">
+        Issued {{ cert.issued_at.strftime('%b %d, %Y') }}
+      </p>
+      <a href="{{ url_for('certificate.download', cert_id=cert.id) }}"
+         class="btn btn-outline btn-block">
+        Download PDF
+      </a>
     </div>
     {% else %}
     <div class="empty-state">

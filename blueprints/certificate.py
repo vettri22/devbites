@@ -20,14 +20,26 @@ def list_certificates():
         total_in_cat = Bite.query.filter_by(category_id=cat.id).count()
         completed_in_cat = (
             Progress.query.join(Bite, Progress.bite_id == Bite.id)
-            .filter(Progress.user_id == current_user.id, Progress.completed == True, Bite.category_id == cat.id)
+            .filter(
+                Progress.user_id == current_user.id,
+                Progress.completed == True,
+                Bite.category_id == cat.id,
+            )
             .count()
         )
-        already_issued = Certificate.query.filter_by(user_id=current_user.id, category_id=cat.id).first()
+        already_issued = Certificate.query.filter_by(
+            user_id=current_user.id,
+            category_id=cat.id
+        ).first()
+
         if total_in_cat and completed_in_cat >= min(MIN_BITES_FOR_CERT, total_in_cat) and not already_issued:
             eligible.append((cat, completed_in_cat))
 
-    return render_template("certificates.html", certs=certs, eligible=eligible)
+    return render_template(
+        "certificates.html",
+        certs=certs,
+        eligible=eligible
+    )
 
 
 @certificate_bp.route("/certificates/generate/<int:category_id>", methods=["POST"])
@@ -37,20 +49,32 @@ def generate(category_id):
 
     completed_in_cat = (
         Progress.query.join(Bite, Progress.bite_id == Bite.id)
-        .filter(Progress.user_id == current_user.id, Progress.completed == True, Bite.category_id == category.id)
+        .filter(
+            Progress.user_id == current_user.id,
+            Progress.completed == True,
+            Bite.category_id == category.id,
+        )
         .count()
     )
 
     if completed_in_cat < MIN_BITES_FOR_CERT:
-        flash(f"Complete at least {MIN_BITES_FOR_CERT} bites in {category.name} to earn this certificate.", "warning")
+        flash(
+            f"Complete at least {MIN_BITES_FOR_CERT} bites in {category.name} to earn this certificate.",
+            "warning",
+        )
         return redirect(url_for("certificate.list_certificates"))
 
-    existing = Certificate.query.filter_by(user_id=current_user.id, category_id=category.id).first()
+    existing = Certificate.query.filter_by(
+        user_id=current_user.id,
+        category_id=category.id,
+    ).first()
+
     if existing:
         flash("Certificate already issued for this category.", "info")
         return redirect(url_for("certificate.list_certificates"))
 
     cert_code = generate_certificate_code()
+
     filepath, filename = generate_certificate_pdf(
         current_app.config["CERTIFICATES_FOLDER"],
         current_user.username,
@@ -65,6 +89,7 @@ def generate(category_id):
         cert_code=cert_code,
         file_path=filename,
     )
+
     db.session.add(cert)
     current_user.xp += 25
     db.session.commit()
@@ -77,9 +102,13 @@ def generate(category_id):
 @login_required
 def download(cert_id):
     cert = Certificate.query.get_or_404(cert_id)
+
     if cert.user_id != current_user.id and not current_user.is_admin:
         flash("Unauthorized access to certificate.", "danger")
         return redirect(url_for("certificate.list_certificates"))
+
     return send_from_directory(
-        current_app.config["CERTIFICATES_FOLDER"], cert.file_path, as_attachment=True
+        current_app.config["CERTIFICATES_FOLDER"],
+        cert.file_path,
+        as_attachment=True,
     )
